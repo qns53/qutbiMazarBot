@@ -103,6 +103,7 @@ def main():
                     text = update["message"]["text"]
                     if is_unicode(text):
                         print("Update content: {}".format(update))
+                        bot.send_message(chat_id,"Doing Great Mate")
                         
                     else:
                         bot.send_message(chat_id, "Hmm, you are sending some weird characters to me...")
