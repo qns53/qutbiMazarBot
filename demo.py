@@ -109,7 +109,7 @@ def main():
                         elif(len(text)==8 and text.isdigit()):
                             bot.send_message(chat_id,"Please enter '1p' if you want to recite 1 Page")
                         elif(text=="1p"):
-                            bot.send_message(chat_id,page_url+pages)
+                            bot.send_message(chat_id,page_url+str(pages))
                             pages=pages+1
                             if(pages==605):
                                 pages=1
