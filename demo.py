@@ -88,7 +88,8 @@ def main():
 
  
     bot = BotHandler(token)
-    
+    pages=1
+    page_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri="
     ###############################################################
 
     print("Ready to talk!")
@@ -102,12 +103,18 @@ def main():
                 if "text" in update["message"]:
                     text = update["message"]["text"]
                     if is_unicode(text):
+                        print("Text: {}".format(text))
                         if(text=="/start"):
                             bot.send_message(chat_id,"Enter Your ITS ID")
-                        elif(len(text)==8):
-                            bot.send_message(chat_id,"Will Send you Details Shortly")
-                        print("Text: {}".format(text))
-                        bot.send_message(chat_id,"Doing Great Mate")
+                        elif(len(text)==8 and text.isdigit()):
+                            bot.send_message(chat_id,"Please enter '1p' if you want to recite 1 Page")
+                        elif(text=="1p"):
+                            bot.send_message(chat_id,page_url+pages)
+                            pages=pages+1
+                            if(pages==605):
+                                pages=1
+                        else:
+                            bot.send_message(chat_id,"Doing Great Mate")
                         
                     else:
                         bot.send_message(chat_id, "Hmm, you are sending some weird characters to me...")
