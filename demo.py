@@ -102,6 +102,10 @@ def main():
                 if "text" in update["message"]:
                     text = update["message"]["text"]
                     if is_unicode(text):
+                        if(text=="/start"):
+                            bot.send_message(chat_id,"Enter Your ITS ID")
+                        elif(len(text)==8):
+                            bot.send_message(chat_id,"Will Send you Details Shortly")
                         print("Text: {}".format(text))
                         bot.send_message(chat_id,"Doing Great Mate")
                         
