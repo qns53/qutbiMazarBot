@@ -107,14 +107,24 @@ def main():
                         if(text=="/start"):
                             bot.send_message(chat_id,"Enter Your ITS ID")
                         elif(len(text)==8 and text.isdigit()):
-                            bot.send_message(chat_id,"Please enter '1p' if you want to recite 1 Page")
+                            bot.send_message(chat_id,"1.Enter '1p' if you want to recite 1 Page \n 2.Enter '3p' if you want to recite 3 pages")
                         elif(text=="1p"):
-                            bot.send_message(chat_id,page_url+str(pages))
+                            bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
                             pages=pages+1
                             if(pages==605):
                                 pages=1
+                        elif(text=="3p"):
+                            bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
+                            if(pages+3>=606):
+                                bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
+                                pages=pages+3-604
+                            else:
+                                bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
+                                pages=pages+3
+                                if(pages==605):
+                                pages=1
                         else:
-                            bot.send_message(chat_id,"Doing Great Mate")
+                            bot.send_message(chat_id,"Please Enter Proper Input")
                         
                     else:
                         bot.send_message(chat_id, "Hmm, you are sending some weird characters to me...")
