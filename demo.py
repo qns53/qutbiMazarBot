@@ -114,7 +114,6 @@ def main():
                             if(pages==605):
                                 pages=1
                         elif(text=="3p"):
-                            bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
                             if(pages+3>=606):
                                 bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
                                 pages=pages+3-604
