@@ -122,7 +122,7 @@ def main():
                                 bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
                                 pages=pages+3
                                 if(pages==605):
-                                pages=1
+                                    pages=1
                         else:
                             bot.send_message(chat_id,"Please Enter Proper Input")
                         
