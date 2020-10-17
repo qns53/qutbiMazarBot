@@ -105,20 +105,22 @@ def main():
                     if is_unicode(text):
                         print("Text: {}".format(text))
                         if(text=="/start"):
-                            bot.send_message(chat_id,"Enter Your ITS ID")
+                            bot.send_message(chat_id,"Please enter your ITS ID to proceed further. \n Shukran")
                         elif(len(text)==8 and text.isdigit()):
-                            bot.send_message(chat_id,"1.Enter '1p' if you want to recite 1 Page \n 2.Enter '3p' if you want to recite 3 pages")
-                        elif(text=="1p"):
-                            bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
+                            bot.send_message(chat_id,"Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script.")
+                        elif(text=="/" or text=="/help"):
+                            bot.send_message(chat_id,"You may use following commands.\n \n /onesipara- Use this command to get one sipara allocated for recitation.\n /onepage-Use this command to get one safa/page allocated for recitation.\n /threepages - Use this command to get three pages allocated for recitation.\n /fivepages - Use this command to get five pages allocated for recitation.\n /tenpages - Use this command to get ten pages allocated for recitation.\n /fifteenpages - Use this command to get fifteen pages allocated for recitation.\n /help - Use this command to get list of available commands.\n /contact - Use this command to send your queries/suggestions/feedbacks.")
+                        elif(text=="/onepage"):
+                            bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n Page/Safa No: "+str(pages)+"\n"+page_url+str(pages)+"\n Reply\n "Done" - if recitation is completed or  \n "Cancel" - if you are unable to recite.")
                             pages=pages+1
                             if(pages==605):
                                 pages=1
-                        elif(text=="3p"):
+                        elif(text=="/threepages"):
                             if(pages+3>=606):
-                                bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
+                                bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n Page/Safa No: "+str(pages)+" to Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
                                 pages=pages+3-604
                             else:
-                                bot.send_message(chat_id,"Click on the URL \n"+page_url+str(pages)+"\n If you want to recite next time than type '/start'")
+                                bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n Page/Safa No: "+str(pages)+" to Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Reply\n "Done" - if recitation is completed or  \n "Cancel" - if you are unable to recite.")
                                 pages=pages+3
                                 if(pages==605):
                                     pages=1
