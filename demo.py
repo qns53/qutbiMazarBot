@@ -68,7 +68,7 @@ class Allocation(object):
         self.recitationsDict={}
 
 
-    def enterInDict(chatId,itsId):
+    def enterInDict(self,chatId,itsId):
         tempList=[]
         tempList.append(itsId)
         tempList.append(datetime.now()) # Timestamp will help us in deleting those entries in recitationsDict which are not touched in last 2(threshold could be changed) hours 
@@ -86,7 +86,7 @@ class Allocation(object):
             return "Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(record[0])+"  to  Page/Safa No: "+str(record[0]+record[1]-1)+"\n"+self.api_url+str(record[0])+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
 
 
-    def allocatePages(chatId,pages):
+    def allocatePages(self,chatId,pages):
         if(len(cancelledList)!=0):
             for record in cancelledList:
                 if(record[1]==pages):
