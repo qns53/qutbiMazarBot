@@ -95,7 +95,7 @@ class Allocation(object):
 
 
     def allocatePages(self,chatId,pages):
-        if(!self.checkKey(chat_id)):
+        if(not self.checkKey(chat_id)):
             return "Please Enter your ITS Id to activate your account"
 
         if(len(self.cancelledList)!=0):
@@ -120,7 +120,7 @@ class Allocation(object):
                 return self.assignPages(chatId,tupple)
 
     def checkForAllocation(self,chatId):
-        if(!self.checkKey(chatId)):
+        if(not self.checkKey(chatId)):
             return False
 
         list=self.recitationsDict[chatId]
@@ -133,26 +133,28 @@ class Allocation(object):
         print(self.recitationsDict)              
         
     def doneRecitation(self,chatId):
-        if(!self.checkKey(chatId)):
+        if(not self.checkKey(chatId)):
             return "Please Enter your ITS Id to activate your account"
 
-        if(!self.checkForAllocation(chatId)):
+        if(not self.checkForAllocation(chatId)):
             return "Please use / or /help to allocate Recitation"
 
         list=self.recitationsDict[chatId]
         list[3]="Done"
         self.recitationsDict[chatId]=list
         self.showDict()
+        return "Recitation Submitted Successfully"
 
     def cancelRecitation(self,chatId):
-        if(!self.checkKey(chatId)):
+        if(not self.checkKey(chatId)):
             return "Please Enter your ITS Id to activate your account"
 
-        if(!self.checkForAllocation(chatId)):
+        if(not self.checkForAllocation(chatId)):
             return "Please use / or /help to allocate Recitation"
 
         del self.recitationsDict[chatId]
         self.showDict()
+        return "Recitation Cancelled"
 
 def main():
     args = parse_args()
@@ -195,6 +197,10 @@ def main():
                             bot.send_message(chat_id,allocationObj.allocatePages(chat_id,3))
                            
                         elif(text=="Done" or text=="done" or text=="DONE"):
+                            bot.send_message(chat_id,allocationObj.doneRecitation(chat_id))
+
+                        elif(text=="Cancel" or text=="cancel" or text=="CANCEL"):
+                            bot.send_message(chat_id,allocationObj.cancelRecitation(chat_id))
 
                         else:
                             bot.send_message(chat_id,"Please Enter Proper Input")
