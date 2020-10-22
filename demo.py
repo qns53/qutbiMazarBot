@@ -7,6 +7,7 @@ import os
 import json
 
 from requests.compat import urljoin
+from datetime import datetime
 
 class BotHandler(object):
     """
@@ -55,14 +56,57 @@ def is_unicode(text):
     return len(text) == len(text.encode())
 
 
-class SimpleDialogueManager(object):
+class Allocation(object):
     """
-    This is the simplest dialogue manager to test the telegram bot.
-    Your task is to create a more advanced one in dialogue_manager.py."
+    Class description will be mentioned soon
     """
     
-    def generate_answer(self, question): 
-        return "Hello, world!" 
+    def __init__(self, url):
+        self.api_url = url
+        self.pages=1
+        self.cancelledList=[] #This list records recitations which were cancelled and allots them when new user comes.
+        self.recitationsDict={}
+
+
+    def enterInDict(chatId,itsId):
+        tempList=[]
+        tempList.append(itsId)
+        tempList.append(datetime.now()) # Timestamp will help us in deleting those entries in recitationsDict which are not touched in last 2(threshold could be changed) hours 
+        self.recitationsDict[chatId]=tempList
+        return "Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script."
+
+    def assignPages(chatId,record):
+        list=recitationsDict[chatId]
+        list.append(record)
+        list.append("Alloted")
+
+        if(record[0]+record[1]>=606)
+            return "Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(record[0])+"  to  Page/Safa No: "+str(604)+"\n"+self.api_url+str(record[0])+"\n Recite remaining pages from this Link \n"+self.api_url+str(1)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
+        else:
+            return "Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(record[0])+"  to  Page/Safa No: "+str(record[0]+record[1]-1)+"\n"+self.api_url+str(record[0])+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
+
+
+    def allocatePages(chatId,pages):
+        if(len(cancelledList)!=0):
+            for record in cancelledList:
+                if(record[1]==pages):
+                    assignPages(chatId,record)
+
+        else:
+            if(self.pages+pages>=606):
+                # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
+                tupple=(self.pages,pages)
+                self.pages=self.pages+pages-604
+                assignPages(chatId,tupple)
+            else:
+                # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
+                tupple=(self.pages,pages)
+                self.pages=self.pages+pages
+                if(self.pages==605):
+                    self.pages=1
+                assignPages(chatId,tupple)
+
+                    
         
 
 def main():
@@ -89,7 +133,8 @@ def main():
  
     bot = BotHandler(token)
     pages=1
-    page_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri="
+    quran_api_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri=" # Page specific url
+    allocationObj=Allocation(quran_api_url)
     ###############################################################
 
     print("Ready to talk!")
@@ -107,23 +152,26 @@ def main():
                         if(text=="/start"):
                             bot.send_message(chat_id,"Please enter your ITS ID to proceed further. \n Shukran")
                         elif(len(text)==8 and text.isdigit()):
-                            bot.send_message(chat_id,"Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script.")
+                            bot.send_message(chat_id,allocationObj.enterInDict(chat_id,text))
+                            #bot.send_message(chat_id,"Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script.")
                         elif(text=="/" or text=="/help"):
                             bot.send_message(chat_id,"You may use following commands.\n \n /onesipara- Use this command to get one sipara allocated for recitation.\n /onepage-Use this command to get one safa/page allocated for recitation.\n /threepages - Use this command to get three pages allocated for recitation.\n /fivepages - Use this command to get five pages allocated for recitation.\n /tenpages - Use this command to get ten pages allocated for recitation.\n /fifteenpages - Use this command to get fifteen pages allocated for recitation.\n /help - Use this command to get list of available commands.\n /contact - Use this command to send your queries/suggestions/feedbacks.")
                         elif(text=="/onepage"):
-                            bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \nPage/Safa No: "+str(pages)+"\n"+page_url+str(pages)+"\nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
-                            pages=pages+1
-                            if(pages==605):
-                                pages=1
+                            bot.send_message(chat_id,allocationObj.allocatePages(chat_id,1))
+                            #bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
+                            #pages=pages+1
+                            #if(pages==605):
+                             #   pages=1
                         elif(text=="/threepages"):
-                            if(pages+3>=606):
-                                bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
-                                pages=pages+3-604
-                            else:
-                                bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
-                                pages=pages+3
-                                if(pages==605):
-                                    pages=1
+                            bot.send_message(chat_id,allocationObj.allocatePages(chat_id,3))
+                            #if(pages+3>=606):
+                            #    bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
+                            #    pages=pages+3-604
+                            #else:
+                            #    bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
+                             #   pages=pages+3
+                            #    if(pages==605):
+                            #        pages=1
                         else:
                             bot.send_message(chat_id,"Please Enter Proper Input")
                         
