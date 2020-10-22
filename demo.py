@@ -75,7 +75,7 @@ class Allocation(object):
         self.recitationsDict[chatId]=tempList
         return "Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script."
 
-    def assignPages(chatId,record):
+    def assignPages(self,chatId,record):
         list=recitationsDict[chatId]
         list.append(record)
         list.append("Alloted")
