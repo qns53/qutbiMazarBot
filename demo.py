@@ -63,7 +63,7 @@ class Allocation(object):
     
     def __init__(self, url):
         self.api_url = url
-        self.pages=1
+        self.pages=603
         self.cancelledList=[] #This list records recitations which were cancelled and allots them when new user comes.
         self.recitationsDict={}
 
