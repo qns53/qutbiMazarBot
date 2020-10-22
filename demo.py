@@ -207,6 +207,8 @@ def main():
                         
                     else:
                         bot.send_message(chat_id, "Hmm, you are sending some weird characters to me...")
+
+                    allocationObj.showDict()
             offset = max(offset, update['update_id'] + 1)
         time.sleep(1)
 
