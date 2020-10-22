@@ -95,7 +95,7 @@ class Allocation(object):
 
 
     def allocatePages(self,chatId,pages):
-        if(not self.checkKey(chat_id)):
+        if(not self.checkKey(chatId)):
             return "Please Enter your ITS Id to activate your account"
 
         if(len(self.cancelledList)!=0):
