@@ -168,16 +168,16 @@ def main():
                             if(allocationObj.checkKey(chat_id)):
                                 bot.send_message(chat_id,allocationObj.allocatePages(chat_id,1))
                             else:
-                                 bot.send_message(chat_id,"Please Enter ITS")
+                                bot.send_message(chat_id,"Please Enter ITS")
                             #bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
                             #pages=pages+1
                             #if(pages==605):
                              #   pages=1
                         elif(text=="/threepages"):
-                             if(allocationObj.checkKey(chat_id)):
+                            if(allocationObj.checkKey(chat_id)):
                                 bot.send_message(chat_id,allocationObj.allocatePages(chat_id,3))
                             else:
-                                 bot.send_message(chat_id,"Please Enter ITS")
+                                bot.send_message(chat_id,"Please Enter ITS")
                             #if(pages+3>=606):
                             #    bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
                             #    pages=pages+3-604
