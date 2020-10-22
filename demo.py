@@ -87,8 +87,8 @@ class Allocation(object):
 
 
     def allocatePages(self,chatId,pages):
-        if(len(cancelledList)!=0):
-            for record in cancelledList:
+        if(len(self.cancelledList)!=0):
+            for record in self.cancelledList:
                 if(record[1]==pages):
                     assignPages(chatId,record)
 
