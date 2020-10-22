@@ -76,9 +76,11 @@ class Allocation(object):
         return "Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script."
 
     def assignPages(self,chatId,record):
-        list=recitationsDict[chatId]
+        list=self.recitationsDict[chatId]
         list.append(record)
         list.append("Alloted")
+
+        self.recitationsDict[chatId]=list
 
         if(record[0]+record[1]>=606):
             return "Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(record[0])+"  to  Page/Safa No: "+str(604)+"\n"+self.api_url+str(record[0])+"\n Recite remaining pages from this Link \n"+self.api_url+str(1)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
