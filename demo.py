@@ -81,7 +81,7 @@ class Allocation(object):
         else:
             return False
 
-     def assignPages(self,chatId,record):
+    def assignPages(self,chatId,record):
         list=self.recitationsDict[chatId]
         list.append(record)
         list.append("Alloted")
