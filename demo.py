@@ -90,21 +90,21 @@ class Allocation(object):
         if(len(self.cancelledList)!=0):
             for record in self.cancelledList:
                 if(record[1]==pages):
-                    assignPages(chatId,record)
+                    self.assignPages(chatId,record)
 
         else:
             if(self.pages+pages>=606):
                 # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
                 tupple=(self.pages,pages)
                 self.pages=self.pages+pages-604
-                assignPages(chatId,tupple)
+                self.assignPages(chatId,tupple)
             else:
                 # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
                 tupple=(self.pages,pages)
                 self.pages=self.pages+pages
                 if(self.pages==605):
                     self.pages=1
-                assignPages(chatId,tupple)
+                self.assignPages(chatId,tupple)
 
                     
         
