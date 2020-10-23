@@ -130,7 +130,10 @@ class Allocation(object):
         return False  
 
     def showDict(self):
-        print(self.recitationsDict)              
+        print("Dictionary: ")
+        print(self.recitationsDict)
+        print("Cancel List: ")
+        print(self.cancelledList)              
         
     def doneRecitation(self,chatId):
         if(not self.checkKey(chatId)):
@@ -154,7 +157,7 @@ class Allocation(object):
 
         list=self.recitationsDict[chatId]
         record=list[2]
-        self.cancelRecitation.append(record)
+        self.cancelledList.append(record)
         del self.recitationsDict[chatId]
         self.showDict()
         return "Recitation Cancelled"
