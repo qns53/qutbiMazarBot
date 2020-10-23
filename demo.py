@@ -105,19 +105,19 @@ class Allocation(object):
                     self.cancelledList.remove(tRecord)
                     return self.assignPages(chatId,tRecord)
 
+        
+        if(self.pages+pages>=606):
+            # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
+            tupple=(self.pages,pages)
+            self.pages=self.pages+pages-604
+            return self.assignPages(chatId,tupple)
         else:
-            if(self.pages+pages>=606):
-                # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
-                tupple=(self.pages,pages)
-                self.pages=self.pages+pages-604
-                return self.assignPages(chatId,tupple)
-            else:
-                # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
-                tupple=(self.pages,pages)
-                self.pages=self.pages+pages
-                if(self.pages==605):
-                    self.pages=1
-                return self.assignPages(chatId,tupple)
+            # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
+            tupple=(self.pages,pages)
+            self.pages=self.pages+pages
+            if(self.pages==605):
+                self.pages=1
+            return self.assignPages(chatId,tupple)
 
     def checkForAllocation(self,chatId):
         if(not self.checkKey(chatId)):
@@ -152,6 +152,9 @@ class Allocation(object):
         if(not self.checkForAllocation(chatId)):
             return "Please use / or /help to allocate Recitation"
 
+        list=self.recitationsDict[chatId]
+        record=list[2]
+        self.cancelRecitation.append(record)
         del self.recitationsDict[chatId]
         self.showDict()
         return "Recitation Cancelled"
