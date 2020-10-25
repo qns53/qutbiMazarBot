@@ -1,9 +1,9 @@
-import mysql.connector
+#!/usr/bin/python3
 
-mydb = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="yaahusain"
-)
+import pymysql
 
-print(mydb)
+# Open database connection
+db = pymysql.connect("localhost","root","yaahusain")
+
+
+print(db)
