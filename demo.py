@@ -62,7 +62,7 @@ class DBManagement(object):
         self.cursor=self.db.cursor()
 
     def insertIntoRecords(self,itsNo,pageNo,pages,miqatId,recType):
-        sql = """INSERT INTO RECORDS(ITS_ID,PAGE_NO,PAGES,MIQAT_ID,REC_TYPE) VALUES("""+str(itsNo)+""","""+str(pageNo)+""","""+str(pages)+""","""+str(miqatId)+""","""+str(recType)+""")"""
+        sql = """INSERT INTO RECORDS(ITS_ID,PAGE_NO,PAGES,MIQAT_ID,REC_TYPE) VALUES("""+str(itsNo)+""","""+str(pageNo)+""","""+str(pages)+""","""+str(miqatId)+""","""+recType+""")"""
         try:
             self.cursor.execute(sql)
             self.db.commit()
