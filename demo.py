@@ -5,6 +5,7 @@ import time
 import argparse
 import os
 import json
+import pymysql
 
 from requests.compat import urljoin
 from datetime import datetime
@@ -54,6 +55,24 @@ def parse_args():
 
 def is_unicode(text):
     return len(text) == len(text.encode())
+
+class DBManagement(object):
+    def __init__(self, username,password,dbName):
+        self.db = pymysql.connect("localhost",username,password,dbName)
+        self.cursor=self.db.cursor()
+
+    def insertIntoRecords(self,itsNo,pageNo,pages,miqatId,recType):
+        sql = """INSERT INTO RECORDS(ITS_ID,PAGE_NO,PAGES,MIQAT_ID,REC_TYPE) VALUES("""+itsNo+""","""+pageNo+""","""+pages+""","""+miqatId+""","""+recType+""")"""
+        try:
+            self.cursor.execute(sql)
+            self.db.commit()
+            return True
+        except:
+            self.db.rollback()
+
+        return False
+
+
 
 
 class Allocation(object):
@@ -176,6 +195,13 @@ def main():
     pages=1
     quran_api_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri=" # Page specific url
     allocationObj=Allocation(quran_api_url)
+    databaseObj=DBManagement("root","yaahusain","qm_bot")
+    itsNo=30427555
+    pageNo=550
+    pages=5
+    miqatId=1
+    recType="P"
+    print(databaseObj.insertIntoRecords(itsNo,pageNo,pages,miqatId,recType))
 
     print("Ready to talk!")
     offset = 0
