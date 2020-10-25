@@ -67,8 +67,9 @@ class DBManagement(object):
             self.cursor.execute(sql)
             self.db.commit()
             return True
-        except:
+        except Exception as ex:
             self.db.rollback()
+            print(ex)
 
         return False
 
