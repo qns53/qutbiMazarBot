@@ -104,7 +104,7 @@ class DBManagement(object):
         return miqat
 
     def insertIntoKhatamRecords(self,miqatId,month,year,khatam):
-        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(khatam)""")"""
+        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(khatam)+""")"""
         try:
             self.cursor.execute(sql)
             self.db.commit()
