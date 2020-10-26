@@ -103,6 +103,18 @@ class DBManagement(object):
 
         return miqat
 
+    def insertIntoKhatamRecords(self,miqatId,month,year,khatam):
+        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(khatam)""")"""
+        try:
+            self.cursor.execute(sql)
+            self.db.commit()
+            return True
+        except Exception as ex:
+            self.db.rollback()
+            print(ex)
+
+        return False
+
 
 
 
@@ -228,9 +240,8 @@ def main():
     quran_api_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri=" # Page specific url
     allocationObj=Allocation(quran_api_url)
     databaseObj=DBManagement("root","yaahusain","qm_bot")
-    print(databaseObj.insertIntoMiqats("General"))
-    print(databaseObj.insertIntoMiqats("Milad-Un-Nabi"))
-    print(databaseObj.getMiqatById(1))
+    print(databaseObj.insertIntoKhatamRecords(1,05,2020,0.0))
+    print(databaseObj.insertIntoKhatamRecords(1,05,2020,2.3))
 
 
     print("Ready to talk!")
