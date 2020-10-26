@@ -209,6 +209,7 @@ class Allocation(object):
         self.pages=1
         self.cancelledList=[] #This list records recitations which were cancelled and allots them when new user comes.
         self.recitationsDict={}
+        self.warningForCompRecit="Please give Response for your prevoius recitation to Proceed Further \n \n Note:Your previous recitation will automatically get cancelled after 2 hours of its allocation"
 
 
     def reset(self):
@@ -216,6 +217,9 @@ class Allocation(object):
         self.cancelledList.clear()
 
     def enterInDict(self,chatId,itsId,miqat):
+        if(self.checkForAllocation(chatId)):
+            return self.warningForCompRecit
+            
         tempList=[]
         tempList.append(itsId)
         tempList.append(miqat)
@@ -242,9 +246,13 @@ class Allocation(object):
             return "Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(record[0])+"  to  Page/Safa No: "+str(record[0]+record[1]-1)+"\n"+self.api_url+str(record[0])+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
 
 
+
     def allocatePages(self,chatId,pages):
         if(not self.checkKey(chatId)):
             return "Please Enter your ITS Id to activate your account"
+
+        if(self.checkForAllocation(chatId)):
+            return self.warningForCompRecit
 
         if(len(self.cancelledList)!=0):
             for record in self.cancelledList:
@@ -297,6 +305,7 @@ class Allocation(object):
         if(not dbServiceObj.insertNewRecordForPages(list)):
             return "Recitation Submission Failed"
         
+        del self.recitationsDict[chatId]
         return "Recitation Submitted Successfully"
 
     def cancelRecitation(self,chatId,miqat):
@@ -360,7 +369,16 @@ def main():
                             
                         elif(text=="/threepages"):
                             bot.send_message(chat_id,allocationObj.allocatePages(chat_id,3))
-                           
+                         
+                        elif(text=="/fivepages"):
+                            bot.send_message(chat_id,allocationObj.allocatePages(chat_id,5))
+
+                        elif(text=="/tenpages"):
+                            bot.send_message(chat_id,allocationObj.allocatePages(chat_id,10))
+
+                        elif(text=="/fifteenpages"):
+                            bot.send_message(chat_id,allocationObj.allocatePages(chat_id,15))
+
                         elif(text=="Done" or text=="done" or text=="DONE"):
                             bot.send_message(chat_id,allocationObj.doneRecitation(chat_id,dbServiceObj))
 
@@ -368,7 +386,7 @@ def main():
                             bot.send_message(chat_id,allocationObj.cancelRecitation(chat_id,miqatMangObj.getCurrentMiqat()))
 
                         elif(text=="/manage"):
-                            bot.send_message(chat_id,"You will require admin access to use following commands \n /changemiqat (username) (password) (miqat Id)")
+                            bot.send_message(chat_id,"You will require admin access to use following commands \n \n /changemiqat (username) (password) (miqat Id)")
 
                         elif(text.split(' ')[0]=="/changemiqat" and len(text.split(' '))==4):
                             inputs=text.split(' ')
