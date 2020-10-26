@@ -150,12 +150,13 @@ class DBService(object):
         if(self.dbObj.insertIntoRecords(list[0],list[3][0],list[3][1],list[1][0],list[3][2])):
             record=self.dbObj.getKhatamRecordByMiqat(list[1][0],list[1][1],list[1][2])
             if(not record is None):
-                record[3]=record[3]+list[3][1]
-                if(record[3]>=604):
-                    record[4]=record[4]+1
-                    record[3]=record[3]-604
+                newPageCount=record[3]+list[3][1]
+                newKhatam=record[4]
+                if(newPageCount>=604):
+                    newKhatam=newKhatam+1
+                    newPageCount=newPageCount-604
 
-                if(self.dbObj.updateKhatamRecords(record[0],record[1],record[2],record[3],record[4])):
+                if(self.dbObj.updateKhatamRecords(record[0],record[1],record[2],newPageCount,newKhatam)):
                     return True
 
         return False
