@@ -73,6 +73,37 @@ class DBManagement(object):
 
         return False
 
+    def insertIntoMiqats(self,miqatName):
+        sql = """INSERT INTO MIQATS(MIQAT_NAME) VALUES('"""+miqatName+"""')"""
+        try:
+            self.cursor.execute(sql)
+            self.db.commit()
+            return True
+        except Exception as ex:
+            self.db.rollback()
+            print(ex)
+
+        return False
+
+    def getMiqatById(self,miqatId):
+        sql = "SELECT * FROM MIQATS  WHERE MIQAT_ID="+str(miqatId)
+        miqat=""
+        try:
+            self.cursor.execute(sql)
+            results = cursor.fetchall()
+            if(len(results)==0):
+                return "No such Miqat Found"
+
+            for row in results:
+                miqat=row[1]
+
+        except Exception as ex:
+            print(ex)
+            return "Error: unable to fetch data"
+
+        return miqat
+
+
 
 
 
@@ -197,12 +228,10 @@ def main():
     quran_api_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri=" # Page specific url
     allocationObj=Allocation(quran_api_url)
     databaseObj=DBManagement("root","yaahusain","qm_bot")
-    itsNo=30427555
-    pageNo=550
-    pages=5
-    miqatId=1
-    recType="P"
-    print(databaseObj.insertIntoRecords(itsNo,pageNo,pages,miqatId,recType))
+    print(databaseObj.insertIntoMiqats("General"))
+    print(databaseObj.insertIntoMiqats("Milad-Un-Nabi"))
+    print(databaseObj.getMiqatById(1))
+
 
     print("Ready to talk!")
     offset = 0
