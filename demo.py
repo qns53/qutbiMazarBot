@@ -240,8 +240,8 @@ def main():
     quran_api_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri=" # Page specific url
     allocationObj=Allocation(quran_api_url)
     databaseObj=DBManagement("root","yaahusain","qm_bot")
-    print(databaseObj.insertIntoKhatamRecords(1,05,2020,0.0))
-    print(databaseObj.insertIntoKhatamRecords(1,05,2020,2.3))
+    print(databaseObj.insertIntoKhatamRecords(1,5,2020,0.0))
+    print(databaseObj.insertIntoKhatamRecords(1,5,2020,2.3))
 
 
     print("Ready to talk!")
