@@ -103,8 +103,8 @@ class DBManagement(object):
 
         return miqat
 
-    def insertIntoKhatamRecords(self,miqatId,month,year,khatam):
-        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(khatam)+""")"""
+    def insertIntoKhatamRecords(self,miqatId,month,year,pages,khatam):
+        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,PAGE_COUNT,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(pages)+""","""+str(khatam)+""")"""
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -115,8 +115,8 @@ class DBManagement(object):
 
         return False
 
-    def updateKhatamRecords(self,miqatId,month,year,khatam):
-        sql = """UPDATE KHATAM_RECORDS SET KHATAM_COUNT="""+str(khatam)+""" WHERE MIQAT_ID="""+str(miqatId)+""" AND MONTH="""+str(month)+""" AND YEAR="""+str(year)
+    def updateKhatamRecords(self,miqatId,month,year,pages,khatam):
+        sql = """UPDATE KHATAM_RECORDS SET PAGE_COUNT="""+str(pages)+""",KHATAM_COUNT="""+str(khatam)+""" WHERE MIQAT_ID="""+str(miqatId)+""" AND MONTH="""+str(month)+""" AND YEAR="""+str(year)
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -127,7 +127,49 @@ class DBManagement(object):
 
         return False
 
+    def getKhatamRecordByMiqat(self,miqatId,month,year):
+        sql="""SELECT * FROM KHATAM_RECORDS WHERE MIQAT_ID="""+str(miqatId)+""" AND MONTH="""+str(month)+""" AND YEAR="""+str(year)
+        try:
+            self.cursor.execute(sql)
+            results = self.cursor.fetchall()
+            if(len(results)==0 or len(results)>=2):
+                return None
 
+            return results[0]
+
+        except Exception as ex:
+            print(ex)
+            return None
+
+
+class DBService(object):
+    def __init__(self, dbObject):
+        self.dbObj=dbObject
+
+    def insertNewRecordForPages(self,list):
+        if(self.dbObj.insertIntoRecords(list[0],list[3][0],list[3][1],list[1][0],list[3][2])):
+            record=self.dbObj.getKhatamRecordByMiqat(list[1][0],list[1][1],list[1][2])
+            if(not record is None):
+                record[3]=record[3]+list[3][1]
+                if(record[3]>=604):
+                    record[4]=record[4]+1
+                    record[3]=record[3]-604
+
+                if(self.dbObj.updateKhatamRecords(record[0],record[1],record[2],record[3],record[4])):
+                    return True
+
+        return False
+
+
+
+class MiqatManger(object):
+    def __init__(self):
+        self.miqatId=1
+        self.month=0
+        self.year=0
+
+    def getCurrentMiqat(self):
+        return (self.miqatId,self.month,self.year)
 
 
 
@@ -143,9 +185,10 @@ class Allocation(object):
         self.recitationsDict={}
 
 
-    def enterInDict(self,chatId,itsId):
+    def enterInDict(self,chatId,itsId,miqat):
         tempList=[]
         tempList.append(itsId)
+        tempList.append(miqat)
         tempList.append(datetime.now()) # Timestamp will help us in deleting those entries in recitationsDict which are not touched in last 2(threshold could be changed) hours 
         self.recitationsDict[chatId]=tempList
         return "Your account is now active. Use / or /help for a list of options. \n \n Note: The bot will allocate pages according to the Misri Quran script."
@@ -175,7 +218,7 @@ class Allocation(object):
 
         if(len(self.cancelledList)!=0):
             for record in self.cancelledList:
-                if(record[1]==pages):
+                if(record[1]==pages and record[2]=="P"):
                     tRecord=record
                     self.cancelledList.remove(tRecord)
                     return self.assignPages(chatId,tRecord)
@@ -183,12 +226,12 @@ class Allocation(object):
         
         if(self.pages+pages>=606):
             # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n Recite remaining pages from this Link \n"+page_url+str(1)+"\n If you want to recite next time than type '/start'")
-            tupple=(self.pages,pages)
+            tupple=(self.pages,pages,"P")
             self.pages=self.pages+pages-604
             return self.assignPages(chatId,tupple)
         else:
             # bot.send_message(chat_id,"Your page allocation for TODAY is as follows: \n \nPage/Safa No: "+str(pages)+"  to  Page/Safa No: "+str(pages+2)+"\n"+page_url+str(pages)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite.")
-            tupple=(self.pages,pages)
+            tupple=(self.pages,pages,"P")
             self.pages=self.pages+pages
             if(self.pages==605):
                 self.pages=1
@@ -199,7 +242,7 @@ class Allocation(object):
             return False
 
         list=self.recitationsDict[chatId]
-        if(len(list)==4):
+        if(len(list)>=4):
             return True
 
         return False  
@@ -210,7 +253,7 @@ class Allocation(object):
         print("Cancel List: ")
         print(self.cancelledList)              
         
-    def doneRecitation(self,chatId):
+    def doneRecitation(self,chatId,dbServiceObj):
         if(not self.checkKey(chatId)):
             return "Please Enter your ITS Id to activate your account"
 
@@ -218,12 +261,15 @@ class Allocation(object):
             return "Please use / or /help to allocate Recitation"
 
         list=self.recitationsDict[chatId]
-        list[3]="Done"
+        list[4]="Done"
         self.recitationsDict[chatId]=list
         self.showDict()
+        if(not dbServiceObj.insertNewRecordForPages(list)):
+            return "Recitation Submission Failed"
+        
         return "Recitation Submitted Successfully"
 
-    def cancelRecitation(self,chatId):
+    def cancelRecitation(self,chatId,miqat):
         if(not self.checkKey(chatId)):
             return "Please Enter your ITS Id to activate your account"
 
@@ -231,8 +277,9 @@ class Allocation(object):
             return "Please use / or /help to allocate Recitation"
 
         list=self.recitationsDict[chatId]
-        record=list[2]
-        self.cancelledList.append(record)
+        record=list[3]
+        if(miqat==list[1]):
+            self.cancelledList.append(record)
         del self.recitationsDict[chatId]
         self.showDict()
         return "Recitation Cancelled"
@@ -252,9 +299,8 @@ def main():
     quran_api_url="http://www.easyquran.com/quran-jpg/htmlpage2.php?uri=" # Page specific url
     allocationObj=Allocation(quran_api_url)
     databaseObj=DBManagement("root","yaahusain","qm_bot")
-    print(databaseObj.insertIntoKhatamRecords(1,5,2020,0.0))
-    print(databaseObj.updateKhatamRecords(1,5,2020,2.3))
-
+    dbServiceObj=DBService(databaseObj)
+    miqatMangObj=MiqatManger()
 
     print("Ready to talk!")
     offset = 0
@@ -271,7 +317,7 @@ def main():
                         if(text=="/start"):
                             bot.send_message(chat_id,"Please enter your ITS ID to proceed further. \n Shukran")
                         elif(len(text)==8 and text.isdigit()):
-                            bot.send_message(chat_id,allocationObj.enterInDict(chat_id,text))
+                            bot.send_message(chat_id,allocationObj.enterInDict(chat_id,text,miqatMangObj.getCurrentMiqat()))
                             
                         elif(text=="/" or text=="/help"):
                             bot.send_message(chat_id,"You may use following commands.\n \n /onesipara- Use this command to get one sipara allocated for recitation.\n /onepage-Use this command to get one safa/page allocated for recitation.\n /threepages - Use this command to get three pages allocated for recitation.\n /fivepages - Use this command to get five pages allocated for recitation.\n /tenpages - Use this command to get ten pages allocated for recitation.\n /fifteenpages - Use this command to get fifteen pages allocated for recitation.\n /help - Use this command to get list of available commands.\n /contact - Use this command to send your queries/suggestions/feedbacks.")
@@ -282,10 +328,10 @@ def main():
                             bot.send_message(chat_id,allocationObj.allocatePages(chat_id,3))
                            
                         elif(text=="Done" or text=="done" or text=="DONE"):
-                            bot.send_message(chat_id,allocationObj.doneRecitation(chat_id))
+                            bot.send_message(chat_id,allocationObj.doneRecitation(chat_id,dbServiceObj))
 
                         elif(text=="Cancel" or text=="cancel" or text=="CANCEL"):
-                            bot.send_message(chat_id,allocationObj.cancelRecitation(chat_id))
+                            bot.send_message(chat_id,allocationObj.cancelRecitation(chat_id,miqatMangObj.getCurrentMiqat()))
 
                         else:
                             bot.send_message(chat_id,"Please Enter Proper Input")
