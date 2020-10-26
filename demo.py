@@ -87,21 +87,18 @@ class DBManagement(object):
 
     def getMiqatById(self,miqatId):
         sql = "SELECT * FROM MIQATS  WHERE MIQAT_ID="+str(miqatId)
-        miqat=""
         try:
             self.cursor.execute(sql)
             results = self.cursor.fetchall()
             if(len(results)==0):
-                return "No such Miqat Found"
+                return None
 
-            for row in results:
-                miqat=row[1]
+            return results[0]
 
         except Exception as ex:
             print(ex)
-            return "Error: unable to fetch data"
+            return None
 
-        return miqat
 
     def insertIntoKhatamRecords(self,miqatId,month,year,pages,khatam):
         sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,PAGE_COUNT,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(pages)+""","""+str(khatam)+""")"""
@@ -161,6 +158,13 @@ class DBService(object):
 
         return False
 
+    def getMiqatNameById(self,miqatId):
+
+        return self.dbObj.getMiqatById(miqatId)
+
+    def insertNewRecordInKhatamRecords(self,miqatId,month,year,pages,khatam):
+        return self.dbObj.insertIntoKhatamRecords(miqatId,month,year,pages,khatam)
+       
 
 
 class MiqatManger(object):
@@ -168,9 +172,30 @@ class MiqatManger(object):
         self.miqatId=1
         self.month=0
         self.year=0
+        self.miqatName="General"
 
     def getCurrentMiqat(self):
         return (self.miqatId,self.month,self.year)
+
+    def getMiqatName(self):
+        return self.miqatName
+
+    def changeMiqat(self,username,password,miqatId,dbServiceObj):
+
+        record=dbServiceObj.getMiqatNameById(miqatId)
+        if(record is None):
+            return (0,"Unable to update Miqat Status \n Make sure you have entered valid Miqat ID")
+
+        currentDate=datetime.now()
+        if(not dbServiceObj.insertNewRecordInKhatamRecords(record[0],currentDate.month,currentDate.year,0,0.0)):
+            return (0,"Unable to update Miqat Status")
+
+        self.miqatId=record[0]
+        self.miqatName=record[1]
+        self.month=currentDate.month
+        self.year=currentDate.year
+
+        return (1,record[1])
 
 
 
@@ -185,6 +210,10 @@ class Allocation(object):
         self.cancelledList=[] #This list records recitations which were cancelled and allots them when new user comes.
         self.recitationsDict={}
 
+
+    def reset(self):
+        self.pages=1
+        self.cancelledList.clear()
 
     def enterInDict(self,chatId,itsId,miqat):
         tempList=[]
@@ -316,7 +345,11 @@ def main():
                     if is_unicode(text):
                         print("Text: {}".format(text))
                         if(text=="/start"):
-                            bot.send_message(chat_id,"Please enter your ITS ID to proceed further. \n Shukran")
+                            name=miqatMangObj.getMiqatName()
+                            if(name=="General"):
+                                bot.send_message(chat_id,"Please enter your ITS ID to proceed further. \n Shukran")
+                            else:
+                                bot.send_message(chat_id,"Miqat: "+name+"\nPlease enter your ITS ID to proceed further. \n Shukran")
                         elif(len(text)==8 and text.isdigit()):
                             bot.send_message(chat_id,allocationObj.enterInDict(chat_id,text,miqatMangObj.getCurrentMiqat()))
                             
@@ -333,6 +366,17 @@ def main():
 
                         elif(text=="Cancel" or text=="cancel" or text=="CANCEL"):
                             bot.send_message(chat_id,allocationObj.cancelRecitation(chat_id,miqatMangObj.getCurrentMiqat()))
+
+                        elif(text=="/manage"):
+                            bot.send_message(chat_id,"You will require admin access to use following commands \n /changemiqat (username) (password) (miqat Id)")
+
+                        elif(text.split(' ')[0]=="/changemiqat" and len(text.split(' '))==4):
+                            inputs=text.split(' ')
+                            tupple=changemiqat(inputs[0],inputs[1],inputs[2],dbServiceObj)
+                            if(tupple[0]==1):
+                                allocationObj.reset()
+                            bot.send_message(chat_id,miqatMangObj.tupple[1])
+
 
                         else:
                             bot.send_message(chat_id,"Please Enter Proper Input")
