@@ -115,6 +115,18 @@ class DBManagement(object):
 
         return False
 
+    def updateKhatamRecords(self,miqatId,month,year,khatam):
+        sql = """UPDATE KHATAM_RECORDS SET KHATAM_COUNT="""+str(khatam)+""" WHERE MIQAT_ID="""+str(miqatId)+""" AND MONTH="""+str(month)+""" AND YEAR="""+str(year)
+        try:
+            self.cursor.execute(sql)
+            self.db.commit()
+            return True
+        except Exception as ex:
+            self.db.rollback()
+            print(ex)
+
+        return False
+
 
 
 
@@ -241,7 +253,7 @@ def main():
     allocationObj=Allocation(quran_api_url)
     databaseObj=DBManagement("root","yaahusain","qm_bot")
     print(databaseObj.insertIntoKhatamRecords(1,5,2020,0.0))
-    print(databaseObj.insertIntoKhatamRecords(1,5,2020,2.3))
+    print(databaseObj.updateKhatamRecords(1,5,2020,2.3))
 
 
     print("Ready to talk!")
