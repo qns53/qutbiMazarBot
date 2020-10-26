@@ -90,7 +90,7 @@ class DBManagement(object):
         miqat=""
         try:
             self.cursor.execute(sql)
-            results = cursor.fetchall()
+            results = self.cursor.fetchall()
             if(len(results)==0):
                 return "No such Miqat Found"
 
