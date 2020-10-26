@@ -372,10 +372,10 @@ def main():
 
                         elif(text.split(' ')[0]=="/changemiqat" and len(text.split(' '))==4):
                             inputs=text.split(' ')
-                            tupple=changemiqat(inputs[0],inputs[1],inputs[2],dbServiceObj)
+                            tupple=miqatMangObj.changemiqat(inputs[0],inputs[1],inputs[2],dbServiceObj)
                             if(tupple[0]==1):
                                 allocationObj.reset()
-                            bot.send_message(chat_id,miqatMangObj.tupple[1])
+                            bot.send_message(chat_id,tupple[1])
 
 
                         else:
