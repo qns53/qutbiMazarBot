@@ -61,6 +61,7 @@ class DBManagement(object):
         self.db = pymysql.connect("localhost",username,password,dbName)
         self.cursor=self.db.cursor()
 
+        # pageNo is starting page number of recitation
     def insertIntoRecords(self,itsNo,pageNo,pages,miqatId,recType):
         sql = """INSERT INTO RECORDS(ITS_ID,PAGE_NO,PAGES,MIQAT_ID,REC_TYPE) VALUES("""+str(itsNo)+""","""+str(pageNo)+""","""+str(pages)+""","""+str(miqatId)+""",'"""+recType+"""')"""
         try:
@@ -138,6 +139,32 @@ class DBManagement(object):
             print(ex)
             return None
 
+    def getValidation(self,username, password):
+        sql="""SELECT * FROM ADMINS WHERE USERNAME='"""+str(username)+"""' AND PASSWORD='"""+str(password)+"""'"""
+        try:
+            self.cursor.execute(sql)
+            results = self.cursor.fetchall()
+            if(len(results)==0 or len(results)>=2):
+                return False
+
+            return True
+
+        except Exception as ex:
+            print(ex)
+            return False
+
+    def insertNewAdmin(self,username,password):
+        sql="""INSERT INTO ADMINS(USERNAME,PASSWORD) VALUES('"""+str(username)+"""','"""+str(password)+"""')"""
+        try:
+            self.cursor.execute(sql)
+            self.db.commit()
+            return True
+        except Exception as ex:
+            self.db.rollback()
+            print(ex)
+
+        return False
+
 
 class DBService(object):
     def __init__(self, dbObject):
@@ -164,6 +191,9 @@ class DBService(object):
 
     def insertNewRecordInKhatamRecords(self,miqatId,month,year,pages,khatam):
         return self.dbObj.insertIntoKhatamRecords(miqatId,month,year,pages,khatam)
+
+    def authenticate(self,username,password):
+        return self.dbObj.getValidation(username,password)
        
 
 
@@ -181,21 +211,24 @@ class MiqatManger(object):
         return self.miqatName
 
     def changeMiqat(self,username,password,miqatId,dbServiceObj):
+        if(dbServiceObj.authenticate(username,password)):
+            record=dbServiceObj.getMiqatNameById(miqatId)
+            if(record is None):
+                return (0,"Unable to update Miqat Status \n Make sure you have entered valid Miqat ID")
 
-        record=dbServiceObj.getMiqatNameById(miqatId)
-        if(record is None):
-            return (0,"Unable to update Miqat Status \n Make sure you have entered valid Miqat ID")
+            currentDate=datetime.now()
+            if(not dbServiceObj.insertNewRecordInKhatamRecords(record[0],currentDate.month,currentDate.year,0,0.0)):
+                return (0,"Unable to update Miqat Status")
 
-        currentDate=datetime.now()
-        if(not dbServiceObj.insertNewRecordInKhatamRecords(record[0],currentDate.month,currentDate.year,0,0.0)):
-            return (0,"Unable to update Miqat Status")
+            self.miqatId=record[0]
+            self.miqatName=record[1]
+            self.month=currentDate.month
+            self.year=currentDate.year
 
-        self.miqatId=record[0]
-        self.miqatName=record[1]
-        self.month=currentDate.month
-        self.year=currentDate.year
+            return (1,record[1])
 
-        return (1,record[1])
+        else:
+            return (0,"Please Enter valid Username and Password")
 
 
 
