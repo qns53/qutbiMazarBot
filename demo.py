@@ -427,6 +427,8 @@ def main():
     databaseObj=DBManagement("root","yaahusain","qm_bot")
     dbServiceObj=DBService(databaseObj)
     miqatMangObj=MiqatManger()
+    miqat_tupple=miqatMangObj.getCurrentMiqat()
+    dbServiceObj.insertNewRecordInKhatamRecords(miqat_tupple[0],miqat_tupple[1],miqat_tupple[2],0,0,0.0)
 
     print("Ready to talk!")
     offset = 0
