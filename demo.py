@@ -195,11 +195,11 @@ class DBService(object):
 
         return self.dbObj.getMiqatById(miqatId)
 
-    def insertNewRecordInKhatamRecords(self,miqatId,month,year,pages,khatam):
+    def insertNewRecordInKhatamRecords(self,miqatId,month,year,siparas,pages,khatam):
         list=self.dbObj.getKhatamRecordByMiqat(miqatId,month,year)
         if((not list is None) and len(list)==1):
             return True
-        return self.dbObj.insertIntoKhatamRecords(miqatId,month,year,pages,khatam)
+        return self.dbObj.insertIntoKhatamRecords(miqatId,month,year,siparas,pages,khatam)
 
     def authenticate(self,username,password):
         return self.dbObj.getValidation(username,password)
@@ -226,7 +226,7 @@ class MiqatManger(object):
                 return (0,"Unable to update Miqat Status \n Make sure you have entered valid Miqat ID")
 
             currentDate=datetime.now()
-            if(not dbServiceObj.insertNewRecordInKhatamRecords(record[0],currentDate.month,currentDate.year,0,0.0)):
+            if(not dbServiceObj.insertNewRecordInKhatamRecords(record[0],currentDate.month,currentDate.year,0,0,0.0)):
                 return (0,"Unable to update Miqat Status")
 
             self.miqatId=record[0]
