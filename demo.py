@@ -250,6 +250,7 @@ class Allocation(object):
     def __init__(self, url):
         self.api_url = url
         self.pages=1
+        self.siparas=1
         self.cancelledList=[] #This list records recitations which were cancelled and allots them when new user comes.
         self.recitationsDict={}
         self.warningForCompRecit="Please give Response for your prevoius recitation to Proceed Further \n \n Note:Your previous recitation will automatically get cancelled after 2 hours of its allocation"
