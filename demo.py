@@ -170,6 +170,7 @@ class DBService(object):
     def insertNewRecordForPages(self,list):
         if(self.dbObj.insertIntoRecords(list[0],list[3][0],list[3][1],list[1][0],list[3][2])):
             record=self.dbObj.getKhatamRecordByMiqat(list[1][0],list[1][1],list[1][2])
+            print(record)
             if(not record is None):
                 newKhatam=record[5]
                 newSiparaCount=record[4]
@@ -428,7 +429,7 @@ def main():
     dbServiceObj=DBService(databaseObj)
     miqatMangObj=MiqatManger()
     miqat_tupple=miqatMangObj.getCurrentMiqat()
-    dbServiceObj.insertNewRecordInKhatamRecords(miqat_tupple[0],miqat_tupple[1],miqat_tupple[2],0,0,0.0)
+    #dbServiceObj.insertNewRecordInKhatamRecords(miqat_tupple[0],miqat_tupple[1],miqat_tupple[2],0,0,0.0)
 
     print("Ready to talk!")
     offset = 0
