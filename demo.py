@@ -130,7 +130,7 @@ class DBManagement(object):
         try:
             self.cursor.execute(sql)
             results = self.cursor.fetchall()
-            return results
+            return results[0]
 
         except Exception as ex:
             print(ex)
