@@ -101,8 +101,8 @@ class DBManagement(object):
             return None
 
 
-    def insertIntoKhatamRecords(self,miqatId,month,year,pages,khatam):
-        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,PAGE_COUNT,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(pages)+""","""+str(khatam)+""")"""
+    def insertIntoKhatamRecords(self,miqatId,month,year,siparas,pages,khatam):
+        sql = """INSERT INTO KHATAM_RECORDS(MIQAT_ID,MONTH,YEAR,PAGE_COUNT,SIPARA_COUNT,KHATAM_COUNT) VALUES("""+str(miqatId)+""","""+str(month)+""","""+str(year)+""","""+str(pages)+""","""+str(siparas)+""","""+str(khatam)+""")"""
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -113,8 +113,8 @@ class DBManagement(object):
 
         return False
 
-    def updateKhatamRecords(self,miqatId,month,year,pages,khatam):
-        sql = """UPDATE KHATAM_RECORDS SET PAGE_COUNT="""+str(pages)+""",KHATAM_COUNT="""+str(khatam)+""" WHERE MIQAT_ID="""+str(miqatId)+""" AND MONTH="""+str(month)+""" AND YEAR="""+str(year)
+    def updateKhatamRecords(self,miqatId,month,year,siparas,pages,khatam):
+        sql = """UPDATE KHATAM_RECORDS SET PAGE_COUNT="""+str(pages)+""",SIPARA_COUNT="""+str(siparas)+""",KHATAM_COUNT="""+str(khatam)+""" WHERE MIQAT_ID="""+str(miqatId)+""" AND MONTH="""+str(month)+""" AND YEAR="""+str(year)
         try:
             self.cursor.execute(sql)
             self.db.commit()
@@ -130,10 +130,7 @@ class DBManagement(object):
         try:
             self.cursor.execute(sql)
             results = self.cursor.fetchall()
-            if(len(results)==0 or len(results)>=2):
-                return None
-
-            return results[0]
+            return results
 
         except Exception as ex:
             print(ex)
@@ -174,13 +171,22 @@ class DBService(object):
         if(self.dbObj.insertIntoRecords(list[0],list[3][0],list[3][1],list[1][0],list[3][2])):
             record=self.dbObj.getKhatamRecordByMiqat(list[1][0],list[1][1],list[1][2])
             if(not record is None):
-                newPageCount=record[3]+list[3][1]
-                newKhatam=record[4]
-                if(newPageCount>=604):
-                    newKhatam=newKhatam+1
-                    newPageCount=newPageCount-604
+                newKhatam=record[5]
+                newSiparaCount=record[4]
+                newPageCount=record[3]
+                if(list[3][2]=="P"):
+                    newPageCount=newPageCount+list[3][1]
+                    if(newPageCount>=604):
+                        newKhatam=newKhatam+1
+                        newPageCount=newPageCount-604
 
-                if(self.dbObj.updateKhatamRecords(record[0],record[1],record[2],newPageCount,newKhatam)):
+                elif(list[3][2]=="S"):
+                    newSiparaCount=newSiparaCount+list[3][1]
+                    if(newSiparaCount>=30):
+                        newKhatam=newKhatam+1
+                        newSiparaCount=newSiparaCount-30                    
+
+                if(self.dbObj.updateKhatamRecords(record[0],record[1],record[2],newSiparaCount,newPageCount,newKhatam)):
                     return True
 
         return False
@@ -190,6 +196,9 @@ class DBService(object):
         return self.dbObj.getMiqatById(miqatId)
 
     def insertNewRecordInKhatamRecords(self,miqatId,month,year,pages,khatam):
+        list=self.dbObj.getKhatamRecordByMiqat(miqatId,month,year)
+        if((not list is None) and len(list)==1):
+            return True
         return self.dbObj.insertIntoKhatamRecords(miqatId,month,year,pages,khatam)
 
     def authenticate(self,username,password):
@@ -308,6 +317,51 @@ class Allocation(object):
                 self.pages=1
             return self.assignPages(chatId,tupple)
 
+
+    def assignSiparas(self,chatId,record):
+        list=self.recitationsDict[chatId]
+        list.append(record)
+        list.append("Alloted")
+
+        self.recitationsDict[chatId]=list
+
+        pageNo=1
+        if(record[0]==2):
+            pageNo=22
+        elif(record[0]>=3 and record[0]<=30):
+            pageNo=22+(record[0]-2)*20
+
+        if(record[0]+record[1]>=32):
+            return "Your sipara allocation for TODAY is as follows: \n \nJuz No: "+str(record[0])+"  to  Juz No: "+str(30)+"\n"+self.api_url+str(pageNo)+"\n AND \n Juz No: "+str(1)+"to Juz No: "+str(record[1]-(30-record[0]+1))+"\n"+self.api_url+str(1)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
+        else:
+            return "Your sipara allocation for TODAY is as follows: \n \nJuz No: "+str(record[0])+"  to  Juz No: "+str(record[0]+record[1]-1)+"\n"+self.api_url+str(pageNo)+"\n \nReply\n'Done' - if recitation is completed or \n'Cancel' - if you are unable to recite."
+
+    def allocateSiparas(self,chatId,siparas):
+        if(not self.checkKey(chatId)):
+            return "Please Enter your ITS Id to activate your account"
+
+        if(self.checkForAllocation(chatId)):
+            return self.warningForCompRecit
+
+        if(len(self.cancelledList)!=0):
+            for record in self.cancelledList:
+                if(record[1]==siparas and record[2]=="S"):
+                    tRecord=record
+                    self.cancelledList.remove(tRecord)
+                    return self.assignSiparas(chatId,tRecord)
+
+        
+        if(self.siparas+siparas>=32):
+            tupple=(self.siparas,siparas,"S")
+            self.siparas=self.siparas+siparas-30
+            return self.assignSiparas(chatId,tupple)
+        else:
+            tupple=(self.siparas,siparas,"S")
+            self.siparas=self.siparas+siparas
+            if(self.siparas==31):
+                self.siparas=1
+            return self.assignSiparas(chatId,tupple)
+
     def checkForAllocation(self,chatId):
         if(not self.checkKey(chatId)):
             return False
@@ -391,7 +445,7 @@ def main():
                             if(name=="General"):
                                 bot.send_message(chat_id,"Please enter your ITS ID to proceed further. \n Shukran")
                             else:
-                                bot.send_message(chat_id,"Miqat: "+name+"\nPlease enter your ITS ID to proceed further. \n Shukran")
+                                bot.send_message(chat_id,"Miqat: "+name+"\n\n Please enter your ITS ID to proceed further. \n Shukran")
                         elif(len(text)==8 and text.isdigit()):
                             bot.send_message(chat_id,allocationObj.enterInDict(chat_id,text,miqatMangObj.getCurrentMiqat()))
                             
@@ -411,6 +465,9 @@ def main():
 
                         elif(text=="/fifteenpages"):
                             bot.send_message(chat_id,allocationObj.allocatePages(chat_id,15))
+
+                        elif(text=="/onesipara"):
+                            bot.send_message(chat_id,allocationObj.allocateSiparas(chat_id,1))
 
                         elif(text=="Done" or text=="done" or text=="DONE"):
                             bot.send_message(chat_id,allocationObj.doneRecitation(chat_id,dbServiceObj))
